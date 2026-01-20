@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UN Peacekeeping Mission Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a4d8c;
+            --primary-light: #2a6ec6;
+            --success: #28a745;
+            --danger: #dc3545;
+            --bg: #f0f2f5;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            padding: 15px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Compact Header */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Small Stats Cards */
+        .quiz-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-card h3 {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Progress Bar */
+        .progress-box {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .bar-bg {
+            background: #eee;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .bar-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: 0.3s;
+        }
+
+        /* Quiz Main Area */
+        .quiz-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            min-height: 300px;
+        }
+
+        .q-num {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .q-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* Options */
+        .options-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-btn {
+            border: 2px solid #eee;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
+            background: #fff;
+            font-size: 1rem;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            background: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .option-idx {
+            width: 28px;
+            height: 28px;
+            background: #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        /* Result Colors */
+        .correct {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+        }
+
+        .incorrect {
+            background: #f8d7da !important;
+            border-color: #dc3545 !important;
+        }
+
+        .disabled {
+            pointer-events: none;
+        }
+
+        
+        #_exp-box {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Nav Buttons */
+        .nav-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-prev {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-next {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-submit {
+            background: var(--success);
+            color: white;
+            display: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Result Screen */
+        #result-screen {
+            display: none;
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border: 5px solid var(--success);
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-peace"></i> Logsewa Tayari | Log Plus</h1>
+            <p>लोकसेवा तयारी</p>
+        </header>
+
+        <div id="quiz-screen">
+            <div class="quiz-stats">
+                <div class="stat-card">
+                    <h3>Time</h3>
+                    <div class="stat-value" id="timer">30:00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Score</h3>
+                    <div class="stat-value" id="current-score">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Question</h3>
+                    <div class="stat-value" id="q-count">1/2</div>
+                </div>
+            </div>
+
+            <div class="progress-box">
+                <div class="bar-bg">
+                    <div class="bar-fill" id="bar-fill"></div>
+                </div>
+            </div>
+
+            <div class="quiz-card">
+                <span class="q-num" id="display-q-num">Question 1</span>
+                <div class="q-text" id="display-q-text">Loading question...</div>
+
+                <div class="options-list" id="options-list">
+                </div>
+
+                <div id="_exp-box"></div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" id="prev-btn" onclick="changeQuestion(-1)"><i
+                            class="fas fa-chevron-left"></i> Privious</button>
+                    <button class="btn btn-next" id="next-btn" onclick="changeQuestion(1)">Next <i
+                            class="fas fa-chevron-right"></i></button>
+                    <button class="btn btn-submit" id="submit-btn" onclick="showResults()">Submit <i
+                            class="fas fa-check-circle"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="result-screen">
+            <h2>Quiz Results</h2>
+            <div class="score-circle" id="final-score">0/0</div>
+            <p id="result-msg" style="margin-bottom: 20px; color: #666;"></p>
+            <button class="btn btn-next" onclick="location.reload()">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            
+            {
+                q: "नेपाली सशस्त्र प्रहरी बल (APF) ले संयुक्त राष्ट्र संघको शान्ति मिसनमा सहभागिता कहिलेदेखि सुरु गरेको हो?",
+                options: ["सन् १९९५ अक्टोबर", "सन् २००२ अक्टोबर", "सन् २००३ डिसेम्बर", "सन् २००८ जुन"],
+                ans: 1,
+                exp: "सशस्त्र प्रहरी बलले सन् २००२ अक्टोबरदेखि UNGCI (इराक) मिसन मार्फत आफ्नो सहभागिता सुरु गरेको हो।",
+                userAns: null,
+                scored: false
+                
+            },
+            {
+                q: "सशस्त्र प्रहरी बलको शान्ति संरक्षण अभियानमा सहभागिताको पहिलो र मुख्य सिद्धान्त के हो?",
+                options: ["संयुक्त राष्ट्रको कमाण्डमा रहनु", "विवादको शान्तिपूर्ण समाधानका सबै उपाय खर्च गरिएपछि मात्र परिचालन हुनु", "स्पष्ट निर्गमन रणनीति हुनु", "द्वन्द्वरत पक्षहरूको सहमति हुनु"],
+                ans: 1,
+                exp: "एपीएफको नीति अनुसार, शान्ति संरक्षण अभियान स्थापना गर्नु अघि विवाद समाधानका सबै शान्तिपूर्ण कूटनीतिक उपायहरू सकिएको हुनुपर्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "संयुक्त राष्ट्र शान्ति संरक्षण तालिम केन्द्र (UNPTC) कहाँ अवस्थित छ?",
+                options: ["काठमाडौं, हलचोक", "नुवाकोट, ककनी", "काभ्रे, पाँचखाल", "मकवानपुर, जरुवाखोला"],
+                ans: 1,
+                exp: "एपीएफको UNPTC नुवाकोटको ककनीमा अवस्थित छ, जबकि नेपाली सेनाको तालिम केन्द्र पाँचखालमा छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "सशस्त्र प्रहरी बलले पहिलो पटक गठित प्रहरी एकाइ (FPU) कुन मिसनमा तैनाथ गरेको थियो?",
+                options: ["युनमिस (सुडान)", "युनमिल (लाइबेरिया)", "मिनुस्ताह (हाइटी)", "अमिसम (सोमालिया)"],
+                ans: 1,
+                exp: "एपीएफले आफ्नो पहिलो FPU टोली सन् २००३ डिसेम्बरमा लाइबेरिया (UNMIL) मा तैनाथ गरेको थियो।",
+                userAns: null,
+                scored: false
+
+            },
+            {
+                q: "२०२६ को तथ्याङ्क अनुसार, एपीएफले हाल विभिन्न मिसनमा कति जना युनपोल (UNPOL) कर्मचारी तैनाथ गरेको छ?",
+                options: ["४५ जना", "५७ जना", "६८ जना", "८२ जना"],
+                ans: 1,
+                exp: "हालको तथ्याङ्क अनुसार, एपीएफले व्यक्तिगत विधा (UNPOL) अन्तर्गत ५७ जना दक्ष जनशक्ति विभिन्न मिसनमा पठाएको छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एक मानक गठित प्रहरी एकाइ (FPU) मा सामान्यतया कति जना कर्मचारीहरू रहने प्रावधान छ?",
+                options: ["१०० जना", "१२० जना", "१४० जना", "१६० जना"],
+                ans: 2,
+                exp: "संयुक्त राष्ट्र संघको मापदण्ड अनुसार एउटा पूर्ण FPU टोलीमा १४० जना सम्म कर्मचारी रहने गर्छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति संरक्षण अभियानका लागि आवश्यक स्रोतहरू कुन कार्यको खर्चमा कटौती गरी प्रयोग गर्नु हुँदैन?",
+                options: ["सैन्य तालिम", "संयुक्त राष्ट्र संघको विकास कार्य (Development Activities)", "मानवीय सहायता", "प्रशासनिक खर्च"],
+                ans: 1,
+                exp: "शान्ति संरक्षणका गतिविधिहरू संयुक्त राष्ट्र संघको नियमित विकास कार्यहरूको बजेटमा असर नपर्ने गरी सञ्चालन गरिनुपर्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "सशस्त्र प्रहरी बलको 'शान्ति संरक्षण प्रतिज्ञा' (Peacekeeping Pledge) कुन धार्मिक ग्रन्थको दर्शनबाट प्रेरित छ?",
+                options: ["मुण्डकोपनिषद", "त्रिपिटक", "भगवद्गीता", "बाइबल"],
+                ans: 2,
+                exp: "एपीएफको शान्ति सेवाको मूल मर्म र कर्तव्य परायणता भगवद्गीताको 'कर्म' दर्शनबाट प्रेरित मानिन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "UNPTC ककनीको कमाण्डेन्ट पदमा कुन दर्जाको अधिकृत रहने व्यवस्था छ?",
+                options: ["प्रहरी उपरीक्षक (SP)", "सशस्त्र प्रहरी वरिष्ठ उपरीक्षक (SSP)", "सशस्त्र प्रहरी नायब महानिरीक्षक (DIG)", "सशस्त्र प्रहरी अतिरिक्त महानिरीक्षक (AIG)"],
+                ans: 1,
+                exp: "युनपोल तालिम केन्द्र (UNPTC) को कमाण्ड सामान्यतया सशस्त्र प्रहरी वरिष्ठ उपरीक्षक (SSP) ले गर्छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफको शान्ति संरक्षण तालिम र वैदेशिक परिचालन कुन विभागले पर्यवेक्षण गर्दछ?",
+                options: ["सीमा सुरक्षा विभाग", "मानव स्रोत विकास विभाग", "कार्य विभाग", "प्रशासन विभाग"],
+                ans: 1,
+                exp: "तालिम र कर्मचारी छनौटको सम्पूर्ण जिम्मेवारी मानव स्रोत विकास विभाग (HRD) को मातहतमा रहन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "सन् २०१३ मा एपीएफले अहिलेसम्मकै सबैभन्दा धेरै FPU कर्मचारी तैनाथ गरेको थियो, उक्त संख्या कति थियो?",
+                options: ["५४० जना", "६२० जना", "७६० जना", "८५० जना"],
+                ans: 2,
+                exp: "सन् २०१३ मा एपीएफले विभिन्न मिसनहरूमा गरी कुल ७६० जना FPU कर्मचारीहरू एकै पटक कार्यक्षेत्रमा खटाएको थियो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "कुन अवस्थामा संयुक्त राष्ट्र सुरक्षा परिषद्ले शान्ति मिसन समाप्त गर्ने निर्णय गर्दछ?",
+                options: ["बजेट अभाव भएमा", "मिसनको जनादेश (Mandate) पूरा भएमा वा असान्दर्भिक भएमा", "स्थानीय सरकारले विरोध गरेमा मात्र", "सेना फिर्ता भएमा"],
+                ans: 1,
+                exp: "जब मिसनको लक्ष्य पूरा हुन्छ वा परिस्थिति परिवर्तन भएर जनादेश असंगत हुन्छ, तब सुरक्षा परिषद्ले मिसन बन्द गर्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "सशस्त्र प्रहरी बलले हालसम्म कति वटा देशका शान्ति मिसनमा सहभागिता जनाइसकेको छ?",
+                options: ["८ भन्दा बढी", "१० भन्दा बढी", "१२ भन्दा बढी", "१५ भन्दा बढी"],
+                ans: 2,
+                exp: "एपीएफले हालसम्म विश्वका १२ भन्दा बढी द्वन्द्वग्रस्त देशहरूमा शान्ति स्थापनार्थ सेवा दिइसकेको छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "हाइटीमा संचालित संयुक्त राष्ट्र संघको मिसनलाई कुन संक्षिप्त नामले चिनिन्छ?",
+                options: ["UNMIL", "MINUSTAH", "UNMISS", "UNAMID"],
+                ans: 1,
+                exp: "हाइटीको मिसनलाई MINUSTAH (United Nations Stabilization Mission in Haiti) भनिन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "२०२६ सम्मको कुल योगदानलाई हेर्दा, एपीएफले कति वर्ष संयुक्त राष्ट्र संघमा सेवा पूरा गरेको छ?",
+                options: ["१८ वर्ष", "२० वर्ष", "२४ वर्ष", "३० वर्ष"],
+                ans: 2,
+                exp: "सन् २००२ अक्टोबरदेखि २०२६ सम्म गणना गर्दा एपीएफले सफलतापूर्वक २४ वर्ष शान्ति मिसनमा व्यतित गरेको छ।",
+                userAns: null,
+                scored: false
+            },
+
+            // New Questions (16 to 51)
+            {
+                q: "शान्ति मिसनमा खटिने सशस्त्र प्रहरी कर्मचारीको छनौट प्रक्रियामा 'Pre-Selection' कसले लिन्छ?",
+                options: ["गृह मन्त्रालय", "सशस्त्र प्रहरी मुख्यालय", "संयुक्त राष्ट्र संघ", "परराष्ट्र मन्त्रालय"],
+                ans: 1,
+                exp: "सशस्त्र प्रहरी मुख्यालयको तालिम निर्देशनालयले कर्मचारीहरूको प्रारम्भिक छनौट (Pre-Selection) गर्दछ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "UNPOL अन्तर्गत 'SAAT' को पूर्ण रूप के हो?",
+                options: ["Security Agency Assistance Team", "Selection Assistance and Assessment Team", "Special Armed Action Team", "Standard Area Assessment Task"],
+                ans: 1,
+                exp: "SAAT भनेको Selection Assistance and Assessment Team हो, जसले शान्ति मिसनको लागि अन्तिम छनौट गर्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "ककनी स्थित UNPTC ले कति रोपनी जग्गा ओगटेको छ?",
+                options: ["३५ रोपनी", "५७ रोपनी", "७२ रोपनी", "८५ रोपनी"],
+                ans: 1,
+                exp: "एपीएफको ककनी स्थित तालिम केन्द्र लगभग ५७ रोपनी क्षेत्रफलमा फैलिएको छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "सशस्त्र प्रहरी बलले 'Specialized Police Team' (SPT) कुन मिसनमा खटाएको थियो?",
+                options: ["इराक", "सुडान", "माली", "दक्षिण सुडान"],
+                ans: 3,
+                exp: "एपीएफले विशेष सीप भएका प्रहरी टोलीहरू दक्षिण सुडान (UNMISS) जस्ता मिसनमा खटाएको छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "UN Peacekeeping को 'Blue Helmet' ले के प्रतीक गर्छ?",
+                options: ["युद्धको घोषणा", "संयुक्त राष्ट्र संघको तटस्थता र शान्ति", "सैनिक शक्ति", "कुनै पनि होइन"],
+                ans: 1,
+                exp: "निलो हेल्मेटले संयुक्त राष्ट्र संघको तटस्थता र शान्ति स्थापनप्रतिको प्रतिबद्धता जनाउँछ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "दक्षिण सुडानमा संचालित UN मिसनको नाम के हो?",
+                options: ["UNMIL", "UNMISS", "MONUSCO", "MINUSCA"],
+                ans: 1,
+                exp: "दक्षिण सुडानको मिसनलाई UNMISS (United Nations Mission in South Sudan) भनिन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "सशस्त्र प्रहरी बलको UNPOL मा सहभागिता हुन कम्तिमा कति वर्ष सेवा अवधि पूरा हुनुपर्छ?",
+                options: ["३ वर्ष", "५ वर्ष", "७ वर्ष", "१० वर्ष"],
+                ans: 1,
+                exp: "सामान्यतया ५ वर्षको सेवा अवधि र निर्धारित मापदण्ड पूरा गरेका कर्मचारी UNPOL को लागि योग्य हुन्छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "कुन वर्ष नेपालले संयुक्त राष्ट्र संघको सदस्यता प्राप्त गरेको थियो?",
+                options: ["सन् १९४५", "सन् १९५०", "सन् १९५५", "सन् १९६०"],
+                ans: 2,
+                exp: "नेपालले १४ डिसेम्बर १९५५ मा संयुक्त राष्ट्र संघको सदस्यता प्राप्त गरेको हो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति मिसनमा 'POC' भन्नाले के बुझिन्छ?",
+                options: ["Point of Contact", "Protection of Civilians", "Power of Command", "Police Operations Center"],
+                ans: 1,
+                exp: "POC को अर्थ Protection of Civilians (नागरिकहरूको सुरक्षा) हो, जुन हालका मिसनहरूको मुख्य म्यान्डेट हो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफले इराकमा (UNGCI) कुन भूमिकामा कार्य गरेको थियो?",
+                options: ["दंगा नियन्त्रण", "संयुक्त राष्ट्र संघका गार्डहरू (UN Guards)", "प्रशासनिक काम", "हवाई सुरक्षा"],
+                ans: 1,
+                exp: "इराकमा एपीएफले संयुक्त राष्ट्र संघका कर्मचारी र कार्यालयको सुरक्षाका लागि गार्डको रूपमा कार्य गरेको थियो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "संयुक्त राष्ट्र संघको वडापत्र (Charter) मा कतिवटा धाराहरू छन्?",
+                options: ["९९", "१०५", "१११", "१२१"],
+                ans: 2,
+                exp: "संयुक्त राष्ट्र संघको वडापत्रमा १११ वटा धाराहरू रहेका छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "हाल संयुक्त राष्ट्र संघको महासचिव को हुन्?",
+                options: ["बान की मुन", "कोफी अन्नान", "एन्टोनियो गुटेरेस", "बुत्रोस घाली"],
+                ans: 2,
+                exp: "एन्टोनियो गुटेरेस (Antonio Guterres) हाल संयुक्त राष्ट्र संघको महासचिव हुन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति मिसनमा खटिने एपीएफ टोलीले प्रयोग गर्ने सवारी साधनको रङ कस्तो हुन्छ?",
+                options: ["निलो", "खाकी", "सेतो", "हरियो"],
+                ans: 2,
+                exp: "संयुक्त राष्ट्र संघका सबै सवारी साधनहरू सेतो रङका हुन्छन् जसमा कालो अक्षरले 'UN' लेखिएको हुन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "UNPOL परीक्षामा उत्तीर्ण हुन 'Language Test' कुन भाषामा लिइन्छ?",
+                options: ["अङ्ग्रेजी वा फ्रेन्च", "नेपाली", "स्पेनिस", "हिन्दी"],
+                ans: 0,
+                exp: "मिसनको आवश्यकता अनुसार अङ्ग्रेजी वा फ्रेन्च भाषामा दक्षता परीक्षा लिइन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफ मुख्यालय हलचोकमा रहेको UN शाखाको प्रमुख कुन दर्जाको हुन्छ?",
+                options: ["सशस्त्र प्रहरी निरीक्षक", "सशस्त्र प्रहरी उपरीक्षक (SP)", "सशस्त्र प्रहरी वरिष्ठ उपरीक्षक (SSP)", "सशस्त्र प्रहरी नायब उपरीक्षक (DSP)"],
+                ans: 1,
+                exp: "मुख्यालयको UN शाखामा सामान्यतया सशस्त्र प्रहरी उपरीक्षक (SP) ले नेतृत्व गर्छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति मिसनमा 'ROE' भन्नाले के बुझिन्छ?",
+                options: ["Rules of Engagement", "Report of Event", "Right of Entry", "Record of Evidence"],
+                ans: 0,
+                exp: "ROE (Rules of Engagement) ले कुन परिस्थितिमा बल प्रयोग गर्ने भन्ने नियमहरू निर्धारण गर्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफले कुन मिसनमा महिला सशस्त्र प्रहरी कर्मचारी पहिलो पटक पठाएको थियो?",
+                options: ["हाइटी", "लाइबेरिया", "सुडान", "कोसोभो"],
+                ans: 1,
+                exp: "लाइबेरिया (UNMIL) मिसनमा एपीएफले पहिलो पटक महिला कर्मचारीहरू समावेश गरेको थियो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "संयुक्त राष्ट्र संघको प्रधान कार्यालय कहाँ रहेको छ?",
+                options: ["लण्डन", "जेनेभा", "न्यूयोर्क", "पेरिस"],
+                ans: 2,
+                exp: "संयुक्त राष्ट्र संघको प्रधान कार्यालय अमेरिकाको न्यूयोर्क शहरमा अवस्थित छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति स्थापनाका तीन मुख्य पिलरहरू मध्ये तलको कुन पर्दैन?",
+                options: ["सहमति (Consent)", "निष्पक्षता (Impartiality)", "आक्रमण (Aggression)", "न्यूनतम बल प्रयोग"],
+                ans: 2,
+                exp: "आक्रमण (Aggression) शान्ति स्थापनाको सिद्धान्त विपरीत कुरा हो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफको UNPTC ककनी कुन जिल्लामा पर्छ?",
+                options: ["काठमाडौं", "धादिङ", "नुवाकोट", "रसुवा"],
+                ans: 2,
+                exp: "यो नुवाकोट जिल्लाको ककनीमा पर्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "सशस्त्र प्रहरी बलको वैदेशिक परिचालन सम्बन्धी निर्देशिका कुन सालमा बनेको हो?",
+                options: ["२०६०", "२०६२", "२०६८", "२०७५"],
+                ans: 2,
+                exp: "एपीएफले २०६८ सालमा वैदेशिक परिचालन सम्बन्धी विस्तृत निर्देशिका जारी गरेको थियो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति मिसनमा 'MEDEVAC' भन्नाले के बुझिन्छ?",
+                options: ["Medical Evaluation", "Medical Evacuation", "Media Vacation", "Medical Vaccination"],
+                ans: 1,
+                exp: "MEDEVAC भनेको आपतकालीन बिरामी वा घाइतेलाई हवाई वा अन्य माध्यमबाट उद्धार गर्नु हो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "संयुक्त राष्ट्र संघको सुरक्षा परिषद्मा कतिवटा स्थायी सदस्य राष्ट्रहरू छन्?",
+                options: ["५", "१०", "१५", "२०"],
+                ans: 0,
+                exp: "सुरक्षा परिषद्मा ५ स्थायी (P5) र १० अस्थायी सदस्य गरी १५ राष्ट्र हुन्छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफका कर्मचारीहरूले UNPOL अन्तर्गत कति महिना सेवा गर्नुपर्छ?",
+                options: ["६ महिना", "९ महिना", "१२ महिना", "१८ महिना"],
+                ans: 2,
+                exp: "UNPOL को कार्यकाल सामान्यतया एक वर्ष (१२ महिना) को हुन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "कोसोभोमा संचालित UN मिसनको नाम के हो?",
+                options: ["UNMIK", "UNIFIL", "UNFICYP", "UNTSO"],
+                ans: 0,
+                exp: "कोसोभोको मिसनलाई UNMIK भनिन्छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति मिसनमा जाने कर्मचारीले कुन रङको 'Beret' (टोपी) लगाउँछन्?",
+                options: ["रातो", "कालो", "निलो", "सेतो"],
+                ans: 2,
+                exp: "संयुक्त राष्ट्र संघका शान्ति सैनिक र प्रहरीले 'UN Blue' रङको टोपी लगाउँछन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफ मुख्यालयमा 'UN Section' कुन निर्देशनालय अन्तर्गत पर्छ?",
+                options: ["प्रशासन निर्देशनालय", "कार्य निर्देशनालय", "तालिम निर्देशनालय", "सीमा सुरक्षा निर्देशनालय"],
+                ans: 1,
+                exp: "यो कार्य निर्देशनालय (Operations Directorate) अन्तर्गत पर्दछ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफले सुडानको कुन क्षेत्रमा धेरै समय FPU तैनाथ गरेको थियो?",
+                options: ["खार्तुम", "दार्फुर", "जुबा", "मलाकाल"],
+                ans: 1,
+                exp: "सुडानको दार्फुर (UNAMID) क्षेत्रमा एपीएफको ठूलो योगदान रहेको थियो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "संयुक्त राष्ट्र संघको बजेटमा सबैभन्दा बढी योगदान गर्ने राष्ट्र कुन हो?",
+                options: ["चीन", "रुस", "अमेरिका", "जापान"],
+                ans: 2,
+                exp: "अमेरिकाले संयुक्त राष्ट्र संघको बजेटमा सबैभन्दा धेरै हिस्सा बेहोर्ने गर्दछ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "मिसनमा खटिएका बेला मृत्यु हुने शान्ति सैनिकलाई दिइने पदकको नाम के हो?",
+                options: ["UN Medal", "Dag Hammarskjöld Medal", "Peace Medal", "Golden Star"],
+                ans: 1,
+                exp: "यो पदक संयुक्त राष्ट्र संघका दोस्रो महासचिवको नाममा राखिएको हो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफको तालिम केन्द्र ककनी समुद्री सतहबाट कति उचाइमा छ?",
+                options: ["१५०० मिटर", "२००० मिटर", "२१०० मिटर", "२५०० मिटर"],
+                ans: 2,
+                exp: "ककनी स्थित तालिम केन्द्र लगभग २१०० मिटरको उचाइमा अवस्थित छ।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "संयुक्त राष्ट्र संघको स्थापना कहिले भएको हो?",
+                options: ["२४ अक्टोबर १९४५", "१५ अगस्ट १९४७", "१ जनवरी १९५०", "२० नोभेम्बर १९४५"],
+                ans: 0,
+                exp: "दोस्रो विश्वयुद्ध पछि २४ अक्टोबर १९४५ मा यसको स्थापना भएको हो।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "शान्ति मिसनमा 'IDP' भन्नाले के बुझिन्छ?",
+                options: ["International Displaced Person", "Internally Displaced Person", "Identity Development Program", "Illegal Detained Person"],
+                ans: 1,
+                exp: "IDP भनेको आफ्नै देश भित्र विस्थापित भएका व्यक्तिहरू हुन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफले प्रयोग गर्ने हातहतियारको निरीक्षण UN मा कसले गर्छ?",
+                options: ["Local Police", "COE (Contingent Owned Equipment) Inspector", "Red Cross", "Ministry of Defense"],
+                ans: 1,
+                exp: "COE इन्स्पेक्टरले टोलीले लगेका सामान र हतियारको गुणस्तर जाँच गर्छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "एपीएफले हालसम्म कति पटक 'Best FPU' अवार्ड प्राप्त गरेको छ?",
+                options: ["१ पटक", "३ पटक", "विभिन्न मिसनमा धेरै पटक", "कहिले पनि छैन"],
+                ans: 2,
+                exp: "एपीएफका विभिन्न टोलीहरूले लाइबेरिया, सुडान र हाइटीमा उत्कृष्ट कार्य सम्पादन बापत धेरै पटक पदक र प्रशंसा पत्र पाएका छन्।",
+                userAns: null,
+                scored: false
+            },
+            {
+                q: "संयुक्त राष्ट्र संघको अन्तर्राष्ट्रिय न्यायालय (ICJ) कहाँ छ?",
+                options: ["जेनेभा", "द हेग", "भियना", "रोम"],
+                ans: 1,
+                exp: "अन्तर्राष्ट्रिय न्यायालय नेदरल्याण्डको द हेग (The Hague) मा रहेको छ।",
+                userAns: null,
+                scored: false
+            }
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+        let timeLeft = 1800;
+
+        // Timer logic
+        const timerTimer = setInterval(() => {
+            if (timeLeft <= 0) { clearInterval(timerTimer); showResults(); }
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' + s : s}`;
+        }, 1000);
+
+        function loadQuestion() {
+            const item = questions[currentIdx];
+            document.getElementById('display-q-num').innerText = `प्रश्न ${currentIdx + 1}`;
+            document.getElementById('display-q-text').innerText = item.q;
+            document.getElementById('q-count').innerText = `${currentIdx + 1}/${questions.length}`;
+
+            const list = document.getElementById('options-list');
+            list.innerHTML = '';
+
+            const letters = ['क', 'ख', 'ग', 'घ'];
+            item.options.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                if (item.userAns !== null) {
+                    btn.classList.add('disabled');
+                    if (i === item.ans) btn.classList.add('correct');
+                    if (i === item.userAns && i !== item.ans) btn.classList.add('incorrect');
+                }
+                btn.innerHTML = `<div class="option-idx">${letters[i]}</div> ${opt}`;
+                btn.onclick = () => handleSelect(i);
+                list.appendChild(btn);
+            });
+
+           
+            const expBox = document.getElementById('_exp-box');
+            if (item.userAns !== null) {
+                expBox.style.display = 'block';
+                expBox.style.background = (item.userAns === item.ans) ? '#d4edda' : '#f8d7da';
+                expBox.innerHTML = `<strong>व्याख्या:</strong> ${item.exp}`;
+            } else {
+                expBox.style.display = 'none';
+            }
+
+            // Progress Bar
+            document.getElementById('bar-fill').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
+
+            // Nav Buttons
+            document.getElementById('prev-btn').disabled = currentIdx === 0;
+            const isLast = currentIdx === questions.length - 1;
+            document.getElementById('next-btn').style.display = isLast ? 'none' : 'flex';
+            document.getElementById('submit-btn').style.display = isLast ? 'flex' : 'none';
+        }
+
+        function handleSelect(choice) {
+            const item = questions[currentIdx];
+            if (item.userAns !== null) return;
+
+            item.userAns = choice;
+            if (choice === item.ans) {
+                score++;
+                document.getElementById('current-score').innerText = score;
+            }
+            loadQuestion();
+        }
+
+        function changeQuestion(dir) {
+            currentIdx += dir;
+            loadQuestion();
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+            document.getElementById('final-score').innerText = `${score}/${questions.length}`;
+
+            const percent = (score / questions.length) * 100;
+            let msg = percent >= 80 ? "उत्कृष्ट प्रदर्शन!" : (percent >= 50 ? "राम्रो, अझै मेहनत गर्नुहोस्।" : "थप अध्ययन आवश्यक छ।");
+            document.getElementById('result-msg').innerText = msg;
+        }
+
+        loadQuestion();
+    </script>
+
+</body>
+
+</html>
